@@ -48,7 +48,7 @@ Mmean = zeros(numTemps,numMCsteps);
 spin = zeros(numSpins_xDim,numSpins_yDim,numSpins_zDim,numTemps,numMCsteps);
 
 % Replace 'for' with 'parfor' to run in parallel with Parallel Computing Toolbox.
-for (tempIndex = 1 : numTemps)
+parfor (tempIndex = 1 : numTemps, parforArg)
     for (tempIndex2 = 1 : numMCsteps)
         spin_temp = initSpins_3D(numSpins_xDim, numSpins_yDim, numSpins_zDim, probSpinUp);
         [spin_temp, Emean_output_after_metropolis, Mmean_output_after_metropolis] = metropolis_3D(spin_temp, kT(tempIndex), J, visual_BHJgrid, montecarlo_steps(tempIndex2));
