@@ -66,6 +66,7 @@ end
 
 %Plot the Ising model of BHJ
 close all;
+clearvars -except  spin  Emean Mmean numTemps numMCsteps kT montecarlo_steps kTc
 for tempIndex = 1:numTemps
     for tempIndex2 = 1:numMCsteps
         figure;
