@@ -1,4 +1,4 @@
-function [spin_metro, Emean_output_after_metropolis, Mmean_output_after_metropolis] = metropolis(spin_metro, kT, J, visual_BHJgrid, montecarlo_steps)
+function [spin_metro, Emean_output_after_metropolis, Mmean_output_after_metropolis] = metropolis_3D(spin_metro, kT, J, visual_BHJgrid, montecarlo_steps)
 %METROPOLIS The Metropolis algorithm.
 %   spin = METROPOLIS(spin, kT, J) runs the Metropolis algorithm on a
 %   configuration of spins with an coupling coefficient |J| at a
