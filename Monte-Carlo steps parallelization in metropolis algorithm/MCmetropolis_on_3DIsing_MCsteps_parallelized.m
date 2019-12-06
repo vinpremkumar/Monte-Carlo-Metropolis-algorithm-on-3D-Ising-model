@@ -2,19 +2,13 @@
 %% Exercise 9: https://www.mathworks.com/matlabcentral/fileexchange/62194-ising-model-and-metropolis-algorithm#functions_tab
 %%-------------------------------------------------------------------------------------------------------
 
-function MCmetropolis_on_3DIsing(par_process_var, visual_BHJgrid_var, numSpins_xDim_var, numSpins_yDim_var, numSpins_zDim_var, kT_var, montecarlo_steps_var)
+function MCmetropolis_on_3DIsing_MCsteps_parallelized(par_process_var, visual_BHJgrid_var, numSpins_xDim_var, numSpins_yDim_var, numSpins_zDim_var, kT_var, montecarlo_steps_var)
 
 clc;
 close all;
-
-%Parallel processing to speed it up? = no loop-by-loop visualization
 delete(gcp('nocreate'));
+%Parallel processing to speed it up? = no loop-by-loop visualization
 par_process = par_process_var;    % edit this; 1=yes, 0=no
-if(par_process == 1)
-    parforArg = Inf;
-else
-    parforArg = 0;
-end
 
 %Visualizing BHJ grid (Metropolis algorithm implemented to 3D Ising model)
 visual_BHJgrid = visual_BHJgrid_var; % edit this; 1=yes, 0=no % Enable in order to visualize every loop but set par_process to false.
@@ -48,29 +42,26 @@ Mmean = zeros(numTemps,numMCsteps);
 spin = zeros(numSpins_xDim,numSpins_yDim,numSpins_zDim,numTemps,numMCsteps);
 
 % Replace 'for' with 'parfor' to run in parallel with Parallel Computing Toolbox.
-parfor (tempIndex = 1 : numTemps, parforArg)
+for (tempIndex = 1 : numTemps)
     for (tempIndex2 = 1 : numMCsteps)
-        spin_temp = initSpins_3D(numSpins_xDim, numSpins_yDim, numSpins_zDim, probSpinUp);
-        [spin_temp, Emean_output_after_metropolis, Mmean_output_after_metropolis] = metropolis_3D(spin_temp, kT(tempIndex), J, visual_BHJgrid, montecarlo_steps(tempIndex2));
+        spin = initSpins_3D(numSpins_xDim, numSpins_yDim, numSpins_zDim, probSpinUp);
+        [spin, Emean_output_after_metropolis, Mmean_output_after_metropolis] = metropolis_3D_parfor(par_process, spin, kT(tempIndex), J, visual_BHJgrid, montecarlo_steps(tempIndex2));
         
         if(visual_BHJgrid == 1)
             Emean(tempIndex,tempIndex2) = Emean_output_after_metropolis;
             Mmean(tempIndex,tempIndex2) = Mmean_output_after_metropolis;
         else
-            Emean(tempIndex,tempIndex2) = energyIsing_3D(spin_temp, J);
-            Mmean(tempIndex,tempIndex2) = magnetizationIsing_3D(spin_temp);
+            Emean(tempIndex,tempIndex2) = energyIsing_3D(spin, J);
+            Mmean(tempIndex,tempIndex2) = magnetizationIsing_3D(spin);
         end
-        spin(:,:,:,tempIndex,tempIndex2) = spin_temp;
     end
 end
 
 %Plot the Ising model of BHJ
 close all;
 clearvars -except  spin  Emean Mmean numTemps numMCsteps kT montecarlo_steps kTc
-for tempIndex = 1:numTemps
-    for tempIndex2 = 1:numMCsteps
         figure;
-        A = (spin(:,:,:,tempIndex,tempIndex2)+1)*128;
+        A = (spin+1)*128;
         A_xyz_dims = size(A);
         x_image_dim = 1:1:A_xyz_dims(1);
         y_image_dim = 1:1:A_xyz_dims(2);
@@ -86,8 +77,6 @@ for tempIndex = 1:numTemps
         colorbar;
         view(-40.3,37.2);
         drawnow;
-    end
-end
 
 %Let's plot the energy vs. temperature and its moving mean and median using the functions movmean and movmedian.
 figure;
